@@ -105,7 +105,7 @@ class AdvancedDataModel(DataModel):
         if type in self.browser.customTypes:
             return self.browser.customTypes[type].onData(c, n, type)
 
-    def search(self, txt):
+    def search(self, txt, reset=True):
         """We swap out the col.findCards function with our custom myFindCards,
         call the original search(), then put it back to its original version.
 
@@ -247,19 +247,19 @@ class AdvancedStatusDelegate(StatusDelegate):
 class AdvancedBrowser(Browser):
     """Maintains state for the add-on."""
 
-    def newBrowserInit(self, mw):
+    def newBrowserInit(self, mw, *args, **kwargs):
         """Init stub to allow us to construct a Browser without doing
         the setup until we need to."""
         QMainWindow.__init__(self, None, Qt.Window)
 
-    def __init__(self, mw):
+    def __init__(self, mw, *args, **kwargs):
         # Override Browser __init_. We manually invoke the original after
         # we use our stub one. This is to work around the fact that super
         # needs to be called on Browser before its methods can be invoked,
         # which add-ons need to do in the hook.
         origInit = Browser.__init__
         Browser.__init__ = self.newBrowserInit
-        super(AdvancedBrowser, self).__init__(mw)
+        super(AdvancedBrowser, self).__init__(mw, *args, **kwargs)
 
         # A list of columns to exclude when building the final column list.
         self.columnsToRemove = []
@@ -273,7 +273,7 @@ class AdvancedBrowser(Browser):
 
         # Build the actual browser, which now has our state in it,
         # and restore constructor.
-        origInit(self, mw)
+        origInit(self, mw, *args, **kwargs)
         Browser.__init__ = origInit
 
 
